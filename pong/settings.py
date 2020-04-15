@@ -10,3 +10,8 @@ class Settings:
 
         # Racket settings
         self.racket_speed = 1.5
+
+        # Bullet settings
+        self.ball_speed = 1.0
+        self.balls_allowed = 1
+        self.ball_color = ( 255,255,255)

@@ -5,6 +5,7 @@ import pygame
 
 from settings import Settings
 from racket import Racket
+from ball import Ball
 
 class Pong:
     """Overall class to manage game assets and behavior. """
@@ -26,6 +27,7 @@ class Pong:
 
         self.left_racket = Racket(self, "images/red_racket.bmp","left")
         self.right_racket = Racket(self, "images/blue_racket.bmp","right")
+        self.balls = pygame.sprite.Group()
 
 
     def run_game(self):
@@ -35,6 +37,7 @@ class Pong:
             self._check_events()
             self.right_racket.update()
             self.left_racket.update()
+            self._update_balls()
             # Make the most recently drawn sreen visible
             self._update_screen()
 
@@ -75,12 +78,33 @@ class Pong:
             self.left_racket.moving_down = True
         elif event.key == pygame.K_x:
             sys.exit()
-    
+        elif event.key == pygame.K_SPACE:
+            self._shoot_ball()
+
+    def _shoot_ball(self):
+        """ Create a new ball and add it to the balls group"""
+        if len(self.balls) < self.settings.balls_allowed:
+            new_ball =  Ball(self)
+            self.balls.add(new_ball)
+
+    def _update_balls(self):
+        """Update position of balls and get rid of the old balls"""
+        # Update ball position
+        self.balls.update()
+
+        # Get rid of balls that have disappeared
+        for ball in self.balls.copy():
+            if ball.rect.right >= self.screen.get_rect().right:
+                self.balls.remove(ball)
+
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
         self.screen.fill(self.settings.bg_color)
         self.left_racket.blitme()
         self.right_racket.blitme()
+
+        for ball in self.balls.sprites():
+            ball.draw_ball()
 
         # Make the most recently drawn sreen visible
         pygame.display.flip()
