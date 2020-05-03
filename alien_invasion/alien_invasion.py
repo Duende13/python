@@ -1,4 +1,4 @@
-import sys
+import os, sys
 from time import sleep
 
 import pygame
@@ -44,6 +44,13 @@ class AlienInvasion:
 
         # Make the Play Button
         self.play_button = Button(self, "Play")
+
+        # sound effects
+        APP_FOLDER = os.path.dirname(os.path.realpath(sys.argv[0]))
+        self.bulletSound = pygame.mixer.Sound(os.path.join(APP_FOLDER,"sounds/laser.wav"))
+        self.hitSound = pygame.mixer.Sound(os.path.join(APP_FOLDER,"sounds/hit.wav"))
+        self.levelup = pygame.mixer.Sound(os.path.join(APP_FOLDER,"sounds/levelUp.wav"))
+        self.death = pygame.mixer.Sound(os.path.join(APP_FOLDER,"sounds/death.wav"))
 
 
     def run_game(self):
@@ -121,6 +128,7 @@ class AlienInvasion:
     def _fire_bullet(self):
         """ Create a new bullet and add it to the bullets group"""
         if len(self.bullets) < self.settings.bullets_allowed:
+            self.bulletSound.play()
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
@@ -143,6 +151,7 @@ class AlienInvasion:
             self.bullets, self.aliens, True, True)
 
         if collisions:
+            self.hitSound.play()
             for aliens in collisions.values():
                 self.stats.score += self.settings.alien_points * len(aliens)
             self.sb.prep_score()
@@ -150,7 +159,8 @@ class AlienInvasion:
 
         if not self.aliens:
             #Destroy existing bullets and create new fleet
-            self.bullets.empty()
+            self.bullets.empty()            
+            self.levelup.play()
             self._create_fleet()
             self.settings.increase_speed()
 
@@ -161,6 +171,7 @@ class AlienInvasion:
     def _update_aliens(self):
         """check if the fleet is at an edge, then update the positions of all"""
         self._check_fleet_edges()
+
         """Update the positions of all aliens in the fleet"""
         self.aliens.update()
 
@@ -216,6 +227,7 @@ class AlienInvasion:
         """Respond to the ship being hit by an alien"""
         if self.stats.ships_left > 0:
             # Decrement ships_left, and update scoreboard
+            self.death.play()
             self.stats.ships_left -= 1
             self.sb.prep_ships()
 
